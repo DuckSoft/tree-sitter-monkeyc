@@ -8,12 +8,12 @@ Both bindings compile native code and require a C/C++ compiler toolchain. The Ru
 
 ## Rust
 
-Until a crates.io release is available, depend on the repository source directly:
+Add the grammar and compatible Tree-sitter runtime from crates.io:
 
 ```toml
 [dependencies]
 tree-sitter = "0.25"
-tree-sitter-monkeyc = { git = "https://github.com/DuckSoft/tree-sitter-monkeyc.git" }
+tree-sitter-monkeyc = "0.1.1"
 ```
 
 Load the language with the exported `LANGUAGE` constant:
