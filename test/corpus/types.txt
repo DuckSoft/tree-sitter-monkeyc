@@ -1,0 +1,294 @@
+==================
+Nested generics, unions and tuples
+==================
+
+typedef Table as Dictionary<Symbol, Array<Dictionary<String, Number or Null>>>;
+var entries as Table?;
+function pair(v as Number | String) as [Number, [String, Boolean?],] or Null { return null; }
+
+---
+
+(source_file
+  (typedef_declaration
+    (identifier)
+    (type_annotation
+      (generic_type
+        (type_identifier
+          (identifier))
+        (type_identifier
+          (identifier))
+        (generic_type
+          (type_identifier
+            (identifier))
+          (generic_type
+            (type_identifier
+              (identifier))
+            (type_identifier
+              (identifier))
+            (union_type
+              (type_identifier
+                (identifier))
+              (null_type)))))))
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (type_annotation
+        (nullable_type
+          (type_identifier
+            (identifier))))))
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (type_annotation
+          (union_type
+            (type_identifier
+              (identifier))
+            (type_identifier
+              (identifier))))))
+    (return_type
+      (union_type
+        (tuple_type
+          (type_identifier
+            (identifier))
+          (tuple_type
+            (type_identifier
+              (identifier))
+            (nullable_type
+              (type_identifier
+                (identifier)))))
+        (null_type)))
+    (block
+      (return_statement
+        (null)))))
+
+==================
+Dictionary shapes and anonymous interfaces
+==================
+
+typedef Options as { :name as String, "values" as Array<Number>, -1 as Boolean, true as Number, 'x' as String, };
+typedef Readable as interface { var value as Number;; function read(limit as Number) as String;; };
+function process(value as interface { function next() as Number?; }) as Void {}
+
+---
+
+(source_file
+  (typedef_declaration
+    (identifier)
+    (type_annotation
+      (dictionary_type
+        (dictionary_type_member
+          (symbol
+            (identifier))
+          (type_annotation
+            (type_identifier
+              (identifier))))
+        (dictionary_type_member
+          (string
+            (string_content))
+          (type_annotation
+            (generic_type
+              (type_identifier
+                (identifier))
+              (type_identifier
+                (identifier)))))
+        (dictionary_type_member
+          (signed_number
+            (number))
+          (type_annotation
+            (type_identifier
+              (identifier))))
+        (dictionary_type_member
+          (boolean)
+          (type_annotation
+            (type_identifier
+              (identifier))))
+        (dictionary_type_member
+          (character
+            (character_content))
+          (type_annotation
+            (type_identifier
+              (identifier)))))))
+  (typedef_declaration
+    (identifier)
+    (type_annotation
+      (interface_type
+        (interface_variable
+          (identifier)
+          (type_annotation
+            (type_identifier
+              (identifier))))
+        (function_signature
+          (identifier)
+          (parameters
+            (parameter
+              (identifier)
+              (type_annotation
+                (type_identifier
+                  (identifier)))))
+          (return_type
+            (type_identifier
+              (identifier)))))))
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (type_annotation
+          (interface_type
+            (function_signature
+              (identifier)
+              (parameters)
+              (return_type
+                (nullable_type
+                  (type_identifier
+                    (identifier)))))))))
+    (return_type
+      (void_type))
+    (block)))
+
+==================
+Callback types and parenthesized callback unions
+==================
+
+typedef Callback as Method(value as Array<Number>) as Number or Null;
+typedef OptionalCallback as (Method(value as String) as Void) or Null;
+var untyped as Method;
+
+---
+
+(source_file
+  (typedef_declaration
+    (identifier)
+    (type_annotation
+      (method_type
+        (parameters
+          (parameter
+            (identifier)
+            (type_annotation
+              (generic_type
+                (type_identifier
+                  (identifier))
+                (type_identifier
+                  (identifier))))))
+        (return_type
+          (union_type
+            (type_identifier
+              (identifier))
+            (null_type))))))
+  (typedef_declaration
+    (identifier)
+    (type_annotation
+      (union_type
+        (method_type
+          (parameters
+            (parameter
+              (identifier)
+              (type_annotation
+                (type_identifier
+                  (identifier)))))
+          (return_type
+            (void_type)))
+        (null_type))))
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (type_annotation
+        (type_identifier
+          (identifier))))))
+
+==================
+Casts versus generic brackets, comparisons and conditionals
+==================
+
+function casts(value) {
+  var less = value as Number < limit;
+  var condition = value as Number ? yes : no;
+  var fallback = value as Number or null;
+  var typed = value as Number or String;
+  var nested = value as Array<Array<Number>>;
+  var chained = value as Number as Float;
+  return (value as Finder).find();
+}
+
+---
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)))
+    (block
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (binary_expression
+            (cast_expression
+              (identifier)
+              (type_identifier
+                (identifier)))
+            (identifier))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (conditional_expression
+            (cast_expression
+              (identifier)
+              (type_identifier
+                (identifier)))
+            (identifier)
+            (identifier))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (binary_expression
+            (cast_expression
+              (identifier)
+              (type_identifier
+                (identifier)))
+            (null))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (cast_expression
+            (identifier)
+            (union_type
+              (type_identifier
+                (identifier))
+              (type_identifier
+                (identifier))))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (cast_expression
+            (identifier)
+            (generic_type
+              (type_identifier
+                (identifier))
+              (generic_type
+                (type_identifier
+                  (identifier))
+                (type_identifier
+                  (identifier)))))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (cast_expression
+            (cast_expression
+              (identifier)
+              (type_identifier
+                (identifier)))
+            (type_identifier
+              (identifier)))))
+      (return_statement
+        (call_expression
+          (member_expression
+            (parenthesized_expression
+              (cast_expression
+                (identifier)
+                (type_identifier
+                  (identifier))))
+            (identifier))
+          (arguments))))))

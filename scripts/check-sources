@@ -1,0 +1,172 @@
+#!/usr/bin/env node
+
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+const { spawnSync } = require("node:child_process");
+
+function usage() {
+  console.error("Usage: scripts/check-sources [--sdk] <source-root>...");
+}
+
+function expandHome(value) {
+  if (value === "~") return os.homedir();
+  if (value.startsWith(`~${path.sep}`)) {
+    return path.join(os.homedir(), value.slice(2));
+  }
+  return value;
+}
+
+function discoverSdk() {
+  if (process.env.SDK_HOME) {
+    const candidate = path.resolve(expandHome(process.env.SDK_HOME));
+    if (fs.existsSync(candidate)) return candidate;
+    throw new Error(`SDK_HOME points to a nonexistent SDK: ${candidate}`);
+  }
+
+  const configCandidates =
+    process.platform === "win32"
+      ? [
+          path.join(
+            process.env.APPDATA || "",
+            "Garmin",
+            "ConnectIQ",
+            "current-sdk.cfg",
+          ),
+        ]
+      : [
+          path.join(
+            os.homedir(),
+            "Library",
+            "Application Support",
+            "Garmin",
+            "ConnectIQ",
+            "current-sdk.cfg",
+          ),
+          path.join(os.homedir(), ".Garmin", "ConnectIQ", "current-sdk.cfg"),
+          path.join(
+            os.homedir(),
+            ".config",
+            "Garmin",
+            "ConnectIQ",
+            "current-sdk.cfg",
+          ),
+        ];
+
+  for (const config of configCandidates) {
+    if (!config || !fs.existsSync(config)) continue;
+    const configured = expandHome(fs.readFileSync(config, "utf8").trim());
+    if (!configured) throw new Error(`SDK pointer is empty: ${config}`);
+    const candidate = path.resolve(path.dirname(config), configured);
+    if (!fs.existsSync(candidate)) {
+      throw new Error(
+        `SDK pointer names a nonexistent directory: ${candidate}`,
+      );
+    }
+    return candidate;
+  }
+
+  throw new Error(
+    "Connect IQ SDK not found; set SDK_HOME or install current-sdk.cfg",
+  );
+}
+
+function collectMonkeyCFiles(root) {
+  const files = [];
+  const pending = [root];
+
+  while (pending.length > 0) {
+    const current = pending.pop();
+    const stat = fs.statSync(current);
+    if (stat.isFile()) {
+      if (path.extname(current).toLowerCase() === ".mc") files.push(current);
+      continue;
+    }
+    if (!stat.isDirectory()) continue;
+
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const child = path.join(current, entry.name);
+      if (entry.isDirectory()) pending.push(child);
+      else if (
+        entry.isFile() &&
+        path.extname(entry.name).toLowerCase() === ".mc"
+      ) {
+        files.push(child);
+      }
+    }
+  }
+
+  return files.sort();
+}
+
+function main() {
+  let includeSdk = false;
+  const roots = [];
+
+  for (const argument of process.argv.slice(2)) {
+    if (argument === "--sdk") includeSdk = true;
+    else if (argument === "--help" || argument === "-h") {
+      usage();
+      return 0;
+    } else if (argument.startsWith("-")) {
+      throw new Error(`Unknown option: ${argument}`);
+    } else {
+      roots.push({ path: path.resolve(argument), explicit: true });
+    }
+  }
+
+  // SDK templates contain ${...} placeholders and are not Monkey C source.
+  if (includeSdk)
+    roots.push({ path: path.join(discoverSdk(), "samples"), explicit: false });
+  if (roots.length === 0) {
+    usage();
+    throw new Error("Provide at least one source root or --sdk");
+  }
+
+  const allFiles = new Set();
+  for (const root of roots) {
+    if (!fs.existsSync(root.path)) {
+      throw new Error(`Source root does not exist: ${root.path}`);
+    }
+    const files = collectMonkeyCFiles(root.path);
+    if (root.explicit && files.length === 0) {
+      throw new Error(
+        `Explicit source root contains no .mc files: ${root.path}`,
+      );
+    }
+    for (const file of files) allFiles.add(file);
+    console.log(`${root.path}: ${files.length} Monkey C source file(s)`);
+  }
+
+  const files = [...allFiles].sort();
+  if (files.length === 0) throw new Error("No Monkey C source files found");
+
+  let failed = 0;
+  for (const file of files) {
+    const result = spawnSync("tree-sitter", ["parse", "--quiet", file], {
+      cwd: path.join(__dirname, ".."),
+      encoding: "utf8",
+      maxBuffer: 16 * 1024 * 1024,
+    });
+    const output = `${result.stdout || ""}${result.stderr || ""}`;
+    const invalidTree = /\b(?:ERROR|MISSING)\b/.test(output);
+    if (result.error || result.status !== 0 || invalidTree) {
+      failed += 1;
+      console.error(`\nFAILED: ${file}`);
+      if (result.error) console.error(result.error.message);
+      if (output.trim()) console.error(output.trimEnd());
+    }
+  }
+
+  console.log(
+    `Checked ${files.length} unique Monkey C source file(s); ${failed} failed.`,
+  );
+  return failed === 0 ? 0 : 1;
+}
+
+try {
+  process.exitCode = main();
+} catch (error) {
+  console.error(`check-sources: ${error.message}`);
+  process.exitCode = 2;
+}

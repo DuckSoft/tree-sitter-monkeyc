@@ -1,0 +1,216 @@
+==================
+Namespaces, imports, aliases and nested classes
+==================
+
+using $.Toybox.System as Sys;
+import Toybox.Lang.*;
+alias oldName as newName;
+public module Navigation {
+  public class Finder extends $.Toybox.WatchUi.View {
+    hidden var position as Number or Null;
+    private static const LIMIT = 12, MASK = 0xff;
+    protected function initialize() { self.position = null; }
+    class Helper extends me.Base { native function find() as Void; }
+  }
+}
+
+---
+
+(source_file
+  (using_declaration
+    (qualified_name
+      (qualified_name
+        (global)
+        (identifier))
+      (identifier))
+    (identifier))
+  (import_declaration
+    (qualified_name
+      (identifier)
+      (identifier)))
+  (alias_declaration
+    (identifier)
+    (identifier))
+  (module_declaration
+    (modifier)
+    (identifier)
+    (module_body
+      (class_declaration
+        (modifier)
+        (identifier)
+        (qualified_name
+          (qualified_name
+            (qualified_name
+              (global)
+              (identifier))
+            (identifier))
+          (identifier))
+        (class_body
+          (variable_declaration
+            (modifier)
+            (variable_declarator
+              (identifier)
+              (type_annotation
+                (union_type
+                  (type_identifier
+                    (identifier))
+                  (null_type)))))
+          (variable_declaration
+            (modifier)
+            (modifier)
+            (variable_declarator
+              (identifier)
+              (number))
+            (variable_declarator
+              (identifier)
+              (number)))
+          (function_declaration
+            (modifier)
+            (identifier)
+            (parameters)
+            (block
+              (assignment_statement
+                (assignment_expression
+                  (member_expression
+                    (self)
+                    (identifier))
+                  (null)))))
+          (class_declaration
+            (identifier)
+            (qualified_name
+              (self)
+              (identifier))
+            (class_body
+              (function_declaration
+                (modifier)
+                (identifier)
+                (parameters)
+                (return_type
+                  (void_type))))))))))
+
+==================
+Annotations on members and enum values
+==================
+
+(:background :typecheck([disableBackgroundCheck, disableGlanceCheck]), :build(-2), :note("x"), :flag(true))
+module Worker {
+  (:release) enum Mode { (:deprecated) OLD = -1, READY, BUSY = "busy", }
+  enum { FIRST, SECOND = FIRST + 1 }
+  (:test) function check(logger) as Boolean { return logger has :debug; }
+}
+
+---
+
+(source_file
+  (module_declaration
+    (annotations
+      (annotation
+        (identifier))
+      (annotation
+        (identifier)
+        (annotation_arguments
+          (annotation_array
+            (identifier)
+            (identifier))))
+      (annotation
+        (identifier)
+        (annotation_arguments
+          (signed_number
+            (number))))
+      (annotation
+        (identifier)
+        (annotation_arguments
+          (string
+            (string_content))))
+      (annotation
+        (identifier)
+        (annotation_arguments
+          (boolean))))
+    (identifier)
+    (module_body
+      (enum_declaration
+        (annotations
+          (annotation
+            (identifier)))
+        (identifier)
+        (enum_body
+          (enum_member
+            (annotations
+              (annotation
+                (identifier)))
+            (identifier)
+            (unary_expression
+              (number)))
+          (enum_member
+            (identifier))
+          (enum_member
+            (identifier)
+            (string
+              (string_content)))))
+      (enum_declaration
+        (enum_body
+          (enum_member
+            (identifier))
+          (enum_member
+            (identifier)
+            (binary_expression
+              (identifier)
+              (number)))))
+      (function_declaration
+        (annotations
+          (annotation
+            (identifier)))
+        (identifier)
+        (parameters
+          (parameter
+            (identifier)))
+        (return_type
+          (type_identifier
+            (identifier)))
+        (block
+          (return_statement
+            (binary_expression
+              (identifier)
+              (symbol
+                (identifier)))))))))
+
+==================
+Keyword symbols and Method identifiers
+==================
+
+var symbols = [:class, :return, :true, :null, :Method, :NaN];
+function Method(Method as Method) as Method { return Method; }
+
+---
+
+(source_file
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (array_expression
+        (symbol
+          (identifier))
+        (symbol
+          (identifier))
+        (symbol
+          (identifier))
+        (symbol
+          (identifier))
+        (symbol
+          (identifier))
+        (symbol
+          (identifier)))))
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (type_annotation
+          (type_identifier
+            (identifier)))))
+    (return_type
+      (type_identifier
+        (identifier)))
+    (block
+      (return_statement
+        (identifier)))))

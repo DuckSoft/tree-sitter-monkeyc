@@ -1,0 +1,324 @@
+==================
+Braced control flow and for assignment lists
+==================
+
+function control(limit) {
+  var x = 0, y = 1;
+  for (var i = 0, j = limit; i < j; i++, --j) {
+    if (i == 2) { continue; } else if (j == 3) { break; } else { x += i; }
+  }
+  for (x = 0, y = limit; x < y; x += 1, y -= 1) { x *= 2; }
+  for (;;) { break; }
+  while (x < limit) { ++x; }
+  do { x--; } while (x > 0);
+  { var nested = x; }
+  return x;
+}
+
+---
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)))
+    (block
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (number))
+        (variable_declarator
+          (identifier)
+          (number)))
+      (for_statement
+        (for_variable_declaration
+          (variable_declarator
+            (identifier)
+            (number))
+          (variable_declarator
+            (identifier)
+            (identifier)))
+        (binary_expression
+          (identifier)
+          (identifier))
+        (expression_list
+          (update_expression
+            (identifier))
+          (update_expression
+            (identifier)))
+        (block
+          (if_statement
+            (parenthesized_expression
+              (binary_expression
+                (identifier)
+                (number)))
+            (block
+              (continue_statement))
+            (if_statement
+              (parenthesized_expression
+                (binary_expression
+                  (identifier)
+                  (number)))
+              (block
+                (break_statement))
+              (block
+                (assignment_statement
+                  (assignment_expression
+                    (identifier)
+                    (identifier))))))))
+      (for_statement
+        (expression_list
+          (assignment_expression
+            (identifier)
+            (number))
+          (assignment_expression
+            (identifier)
+            (identifier)))
+        (binary_expression
+          (identifier)
+          (identifier))
+        (expression_list
+          (assignment_expression
+            (identifier)
+            (number))
+          (assignment_expression
+            (identifier)
+            (number)))
+        (block
+          (assignment_statement
+            (assignment_expression
+              (identifier)
+              (number)))))
+      (for_statement
+        (block
+          (break_statement)))
+      (while_statement
+        (parenthesized_expression
+          (binary_expression
+            (identifier)
+            (identifier)))
+        (block
+          (update_statement
+            (update_expression
+              (identifier)))))
+      (do_statement
+        (block
+          (update_statement
+            (update_expression
+              (identifier))))
+        (parenthesized_expression
+          (binary_expression
+            (identifier)
+            (number))))
+      (block
+        (local_variable_declaration
+          (variable_declarator
+            (identifier)
+            (identifier))))
+      (return_statement
+        (identifier)))))
+
+==================
+Switch type cases, fallthrough and scoped case blocks
+==================
+
+function choose(value) {
+  switch (value) {
+    case instanceof Number:
+    case 0: { return true; }
+    case :ready: value = null; break;
+    default: return false;
+  }
+}
+
+---
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)))
+    (block
+      (switch_statement
+        (parenthesized_expression
+          (identifier))
+        (switch_body
+          (switch_case
+            (identifier))
+          (switch_case
+            (number)
+            (block
+              (return_statement
+                (boolean))))
+          (switch_case
+            (symbol
+              (identifier))
+            (assignment_statement
+              (assignment_expression
+                (identifier)
+                (null)))
+            (break_statement))
+          (switch_default
+            (return_statement
+              (boolean))))))))
+
+==================
+Typed catches and finally without catch
+==================
+
+function recover() {
+  try { throw new Lang.Exception("failure"); }
+  catch (ex instanceof Lang.Exception) { throw ex; }
+  catch (other) { return null; }
+  finally { cleanup(); }
+  try { run(); } finally { cleanup(); }
+}
+
+---
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters)
+    (block
+      (try_statement
+        (block
+          (throw_statement
+            (new_expression
+              (member_expression
+                (identifier)
+                (identifier))
+              (arguments
+                (string
+                  (string_content))))))
+        (catch_clause
+          (identifier)
+          (qualified_name
+            (identifier)
+            (identifier))
+          (block
+            (throw_statement
+              (identifier))))
+        (catch_clause
+          (identifier)
+          (block
+            (return_statement
+              (null))))
+        (finally_clause
+          (block
+            (expression_statement
+              (call_expression
+                (identifier)
+                (arguments))))))
+      (try_statement
+        (block
+          (expression_statement
+            (call_expression
+              (identifier)
+              (arguments))))
+        (finally_clause
+          (block
+            (expression_statement
+              (call_expression
+                (identifier)
+                (arguments)))))))))
+
+==================
+Assignments and updates retain targets and operators
+==================
+
+function assign() {
+  self.x = 1; me.y += 2; $.GLOBAL -= 3;
+  arr[0] *= 2; arr[1] /= 3; x %= 2;
+  x <<= 1; x >>= 1; x &= 3; x ^= 2; x |= 4;
+  ++x; --x; x++; x--;
+  (value as Thing).field = new Thing();
+}
+
+---
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters)
+    (block
+      (assignment_statement
+        (assignment_expression
+          (member_expression
+            (self)
+            (identifier))
+          (number)))
+      (assignment_statement
+        (assignment_expression
+          (member_expression
+            (self)
+            (identifier))
+          (number)))
+      (assignment_statement
+        (assignment_expression
+          (member_expression
+            (global)
+            (identifier))
+          (number)))
+      (assignment_statement
+        (assignment_expression
+          (index_expression
+            (identifier)
+            (number))
+          (number)))
+      (assignment_statement
+        (assignment_expression
+          (index_expression
+            (identifier)
+            (number))
+          (number)))
+      (assignment_statement
+        (assignment_expression
+          (identifier)
+          (number)))
+      (assignment_statement
+        (assignment_expression
+          (identifier)
+          (number)))
+      (assignment_statement
+        (assignment_expression
+          (identifier)
+          (number)))
+      (assignment_statement
+        (assignment_expression
+          (identifier)
+          (number)))
+      (assignment_statement
+        (assignment_expression
+          (identifier)
+          (number)))
+      (assignment_statement
+        (assignment_expression
+          (identifier)
+          (number)))
+      (update_statement
+        (update_expression
+          (identifier)))
+      (update_statement
+        (update_expression
+          (identifier)))
+      (update_statement
+        (update_expression
+          (identifier)))
+      (update_statement
+        (update_expression
+          (identifier)))
+      (assignment_statement
+        (assignment_expression
+          (member_expression
+            (parenthesized_expression
+              (cast_expression
+                (identifier)
+                (type_identifier
+                  (identifier))))
+            (identifier))
+          (new_expression
+            (identifier)
+            (arguments)))))))

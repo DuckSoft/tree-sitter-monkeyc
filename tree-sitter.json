@@ -1,0 +1,28 @@
+{
+  "grammars": [
+    {
+      "name": "monkeyc",
+      "camelcase": "MonkeyC",
+      "scope": "source.monkeyc",
+      "path": ".",
+      "file-types": ["mc"],
+      "highlights": "queries/highlights.scm",
+      "locals": "queries/locals.scm",
+      "tags": "queries/tags.scm"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "description": "Monkey C grammar for tree-sitter",
+    "authors": []
+  },
+  "bindings": {
+    "c": false,
+    "go": false,
+    "node": true,
+    "python": false,
+    "rust": true,
+    "swift": false,
+    "zig": false
+  }
+}

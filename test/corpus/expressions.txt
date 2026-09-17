@@ -1,0 +1,397 @@
+==================
+Non C arithmetic and comparison precedence
+==================
+
+function precedence() {
+  var a = first + second << third;
+  var b = first & second * third;
+  var c = first | second + third ^ fourth;
+  var d = first == second < third;
+  var e = first + second instanceof Number;
+  var f = first has :run and ready || fallback;
+  var g = a ? b : c ? d : e;
+  var h = !~-first as Number;
+}
+
+---
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters)
+    (block
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (binary_expression
+            (identifier)
+            (binary_expression
+              (identifier)
+              (identifier)))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (binary_expression
+            (binary_expression
+              (identifier)
+              (identifier))
+            (identifier))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (binary_expression
+            (binary_expression
+              (binary_expression
+                (identifier)
+                (identifier))
+              (identifier))
+            (identifier))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (binary_expression
+            (binary_expression
+              (identifier)
+              (identifier))
+            (identifier))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (binary_expression
+            (identifier)
+            (binary_expression
+              (identifier)
+              (identifier)))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (binary_expression
+            (binary_expression
+              (binary_expression
+                (identifier)
+                (symbol
+                  (identifier)))
+              (identifier))
+            (identifier))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (conditional_expression
+            (identifier)
+            (identifier)
+            (conditional_expression
+              (identifier)
+              (identifier)
+              (identifier)))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (cast_expression
+            (unary_expression
+              (unary_expression
+                (unary_expression
+                  (identifier))))
+            (type_identifier
+              (identifier))))))))
+
+==================
+Right shift and generic closers remain distinct
+==================
+
+function shift(value as Array<Array<Number>>) {
+  var a = value[0][0] >> 2;
+  var b = a + 8 > /* split shift */ > 1;
+  a >>= 1;
+  return b;
+}
+
+---
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (type_annotation
+          (generic_type
+            (type_identifier
+              (identifier))
+            (generic_type
+              (type_identifier
+                (identifier))
+              (type_identifier
+                (identifier)))))))
+    (block
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (binary_expression
+            (index_expression
+              (index_expression
+                (identifier)
+                (number))
+              (number))
+            (right_shift_operator)
+            (number))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (binary_expression
+            (identifier)
+            (binary_expression
+              (number)
+              (right_shift_operator
+                (comment))
+              (number)))))
+      (assignment_statement
+        (assignment_expression
+          (identifier)
+          (number)))
+      (return_statement
+        (identifier)))))
+
+==================
+Array, dictionary and byte array constructors
+==================
+
+var values = [1, null, [true],];
+var empty = [], dict = {}, bytes = []b;
+var table = {:key => 1, "x" => [1, 2],};
+var buffer = [0, 127, 255,]b;
+var sized = new [32]b;
+var untyped = new [10];
+var typed = new Array<Number>[4];
+var initialized = [1, 2] as Array<Number>;
+var options = {:key => "value"} as Dictionary<Symbol, String>;
+
+---
+
+(source_file
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (array_expression
+        (number)
+        (null)
+        (array_expression
+          (boolean)))))
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (array_expression))
+    (variable_declarator
+      (identifier)
+      (dictionary_expression))
+    (variable_declarator
+      (identifier)
+      (byte_array_expression)))
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (dictionary_expression
+        (pair
+          (symbol
+            (identifier))
+          (number))
+        (pair
+          (string
+            (string_content))
+          (array_expression
+            (number)
+            (number))))))
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (byte_array_expression
+        (number)
+        (number)
+        (number))))
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (new_array_expression
+        (number))))
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (new_array_expression
+        (number))))
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (new_array_expression
+        (generic_type
+          (type_identifier
+            (identifier))
+          (type_identifier
+            (identifier)))
+        (number))))
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (cast_expression
+        (array_expression
+          (number)
+          (number))
+        (generic_type
+          (type_identifier
+            (identifier))
+          (type_identifier
+            (identifier))))))
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (cast_expression
+        (dictionary_expression
+          (pair
+            (symbol
+              (identifier))
+            (string
+              (string_content))))
+        (generic_type
+          (type_identifier
+            (identifier))
+          (type_identifier
+            (identifier))
+          (type_identifier
+            (identifier)))))))
+
+==================
+Construction through object members and indexed containers
+==================
+
+function create() {
+  var simple = new $.App.Finder(1, 2);
+  var nested = new owners[0].Finder();
+  var factory = new factory().Finder();
+  var derived = new (owner as Owner).Finder();
+  return nested.items[0].method(:run).invoke(simple);
+}
+
+---
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters)
+    (block
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (new_expression
+            (member_expression
+              (member_expression
+                (global)
+                (identifier))
+              (identifier))
+            (arguments
+              (number)
+              (number)))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (new_expression
+            (member_expression
+              (index_expression
+                (identifier)
+                (number))
+              (identifier))
+            (arguments))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (call_expression
+            (member_expression
+              (new_expression
+                (identifier)
+                (arguments))
+              (identifier))
+            (arguments))))
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (new_expression
+            (member_expression
+              (parenthesized_expression
+                (cast_expression
+                  (identifier)
+                  (type_identifier
+                    (identifier))))
+              (identifier))
+            (arguments))))
+      (return_statement
+        (call_expression
+          (member_expression
+            (call_expression
+              (member_expression
+                (index_expression
+                  (member_expression
+                    (identifier)
+                    (identifier))
+                  (number))
+                (identifier))
+              (arguments
+                (symbol
+                  (identifier))))
+            (identifier))
+          (arguments
+            (identifier)))))))
+
+==================
+Numeric, character, Unicode and multiline string literals
+==================
+
+var nums = [0, 077, 42L, 0xdeadbeef, 0x123L, 1f, 2d, 1.25, .5, 1e-3d, NaN];
+var text = "line\nquote\" slash\\ unicode\u4e2d";
+var chars = ['x', '\n', '\u4e2d', '\''];
+var 多语言 = "line one
+line two";
+
+---
+
+(source_file
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (array_expression
+        (number)
+        (number)
+        (number)
+        (number)
+        (number)
+        (number)
+        (number)
+        (number)
+        (number)
+        (number)
+        (number))))
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (string
+        (string_content)
+        (escape_sequence)
+        (string_content)
+        (escape_sequence)
+        (string_content)
+        (escape_sequence)
+        (string_content)
+        (escape_sequence))))
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (array_expression
+        (character
+          (character_content))
+        (character
+          (escape_sequence))
+        (character
+          (escape_sequence))
+        (character
+          (escape_sequence)))))
+  (variable_declaration
+    (variable_declarator
+      (identifier)
+      (string
+        (string_content)))))

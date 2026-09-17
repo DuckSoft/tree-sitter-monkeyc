@@ -1,0 +1,43 @@
+==================
+Comments survive inside declarations and expressions
+==================
+
+//! A documentation comment
+/* Before the declaration */
+function /* name */ f(/* argument */ x) /* return */ as Number {
+  var a = [1, /* middle */ 2,]; // trailing
+  return x /* operand */ + a[0];
+} // EOF comment
+---
+
+(source_file
+  (comment)
+  (comment)
+  (function_declaration
+    (comment)
+    (identifier)
+    (parameters
+      (comment)
+      (parameter
+        (identifier)))
+    (comment)
+    (return_type
+      (type_identifier
+        (identifier)))
+    (block
+      (local_variable_declaration
+        (variable_declarator
+          (identifier)
+          (array_expression
+            (number)
+            (comment)
+            (number))))
+      (comment)
+      (return_statement
+        (binary_expression
+          (identifier)
+          (comment)
+          (index_expression
+            (identifier)
+            (number))))))
+  (comment))
